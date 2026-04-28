@@ -3,6 +3,12 @@
 % =========================================
 
 % =========================================
+% 0. DYNAMIC DECLARATION (IMPORTANT)
+% =========================================
+:- dynamic candidate/5.
+:- dynamic job/3.
+
+% =========================================
 % 1. CANDIDATE DATA (FACTS)
 % =========================================
 
@@ -23,7 +29,6 @@ job(ai_engineer, [python, ai, ml], bsc_it).
 job(system_admin, [networking], bsc_it).
 job(database_admin, [sql], bsc_it).
 job(cyber_security, [security, networking], bsc_it).
-
 
 % =========================================
 % 3. CHECK SKILLS
@@ -98,26 +103,7 @@ run(Job) :-
     nl.
 
 % =========================================
-% 10. USER INPUT (START)
-% =========================================
-
-start :-
-    write('==================================='),nl,
-    write('      JOB ELIGIBILITY CHECKER      '),nl,
-    write('==================================='),nl,nl,
-    write('Enter job name (example: software_engineer.)'), nl,nl,
-    read(Job),
-    ( job(Job,_,_) ->
-        run(Job),
-        nl,
-        write('=============THANK YOU============='),nl
-    ;
-        write('Invalid job! Try again.'), nl
-    ).
-
-
-% =========================================
-% SHOW ELIGIBLE CANDIDATES FOR ONE JOB
+% 10. SHOW ELIGIBLE CANDIDATES FOR ONE JOB
 % =========================================
 
 show_eligible_for_job(Job) :-
@@ -132,7 +118,7 @@ show_eligible_for_job(Job) :-
     nl.
 
 % =========================================
-% RUN FOR ALL JOBS
+% 11. RUN FOR ALL JOBS
 % =========================================
 
 run_all_jobs :-
@@ -146,3 +132,94 @@ run_jobs([]).
 run_jobs([J|T]) :-
     show_eligible_for_job(J),
     run_jobs(T).
+
+% =========================================
+% 12. ADD NEW CANDIDATE
+% =========================================
+
+add_candidate :-
+    write('Enter name: '), read(Name),
+    write('Enter marks: '), read(Marks),
+    write('Enter skills list (example: [java,python]): '), read(Skills),
+    write('Enter experience: '), read(Exp),
+    write('Enter qualification: '), read(Qual),
+
+    assertz(candidate(Name, Marks, Skills, Exp, Qual)),
+    nl, write('Candidate added successfully!'), nl.
+
+% =========================================
+% 13. ADD NEW JOB
+% =========================================
+
+add_job :-
+    write('Enter job name: '), read(Job),
+    write('Enter required skills: '), read(Skills),
+    write('Enter qualification: '), read(Qual),
+
+    assertz(job(Job, Skills, Qual)),
+    nl, write('Job added successfully!'), nl.
+
+% =========================================
+% 14. REMOVE CANDIDATE
+% =========================================
+
+remove_candidate :-
+    write('Enter candidate name to remove: '), read(Name),
+    ( retractall(candidate(Name,_,_,_,_)) ->
+        write('Candidate removed successfully!'), nl
+    ;
+        write('Candidate not found.'), nl
+    ).
+
+% =========================================
+% 15. MENU SYSTEM
+% =========================================
+
+start :-
+    nl,
+    write('==================================='),nl,
+    write('      JOB ELIGIBILITY CHECKER      '),nl,
+    write('==================================='),nl,nl,
+
+    write('1. Check job eligibility'), nl,
+    write('2. Add new candidate'), nl,
+    write('3. Add new job'), nl,
+    write('4. Remove candidate'), nl,
+    write('5. Show all jobs result'), nl,
+    write('6. Exit'), nl,nl,
+
+    write('Enter choice: '), read(Choice), nl,
+    handle_choice(Choice).
+
+handle_choice(1) :-
+    write('Enter job name: '), nl,
+    read(Job),
+    ( job(Job,_,_) ->
+        run(Job)
+    ;
+        write('Invalid job!'), nl
+    ),
+    start.
+
+handle_choice(2) :-
+    add_candidate,
+    start.
+
+handle_choice(3) :-
+    add_job,
+    start.
+
+handle_choice(4) :-
+    remove_candidate,
+    start.
+
+handle_choice(5) :-
+    run_all_jobs,
+    start.
+
+handle_choice(6) :-
+    write('============= THANK YOU ============='), nl.
+
+handle_choice(_) :-
+    write('Invalid choice! Try again.'), nl,
+    start.
